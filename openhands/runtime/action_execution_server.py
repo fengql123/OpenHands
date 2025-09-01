@@ -372,9 +372,18 @@ class ActionExecutor:
         logger.debug('Bash init commands completed')
 
     async def run_action(self, action) -> Observation:
+        start_time = time.time()
         async with self.lock:
             action_type = action.action
             observation = await getattr(self, action_type)(action)
+            end_time = time.time()
+            latency = end_time - start_time
+            print(f"Action: {action_type}, Time: {latency:.3f}s")
+            logger.info(f"Action executed: {action_type} in {latency:.3f}s", extra={
+                'action_type': action_type, 
+                'latency': latency,
+                'msg_type': 'ACTION_TIMING'
+            })
             return observation
 
     async def run(
